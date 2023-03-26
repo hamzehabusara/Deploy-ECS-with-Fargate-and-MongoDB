@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  app:
+    image: omark0/palmhr:mobilesearch
+    ports:
+      - 80:80
+    environment:
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:4.4.10-bionic
+    ports:
+      - 27017:27017
+    volumes:
+      - db:/data/db
+
+volumes:
+  db:
