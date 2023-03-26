@@ -1,0 +1,33 @@
+- hosts: localhost
+  vars:
+    uri: "{{ aws_ecs_service.app.load_balancer.0.dns_name }}"
+  tasks:
+    - name: Wait for app to be ready
+      uri:
+        url: "http://{{ uri }}/mobile/search?announceDate=1999&priceEur=200"
+        method: GET
+        return_content: yes
+        status_code: 200
+        timeout: 60
+      register: response
+
+    - debug:
+        var: response.content
+- name: Install Docker and Docker Compose
+  become: true
+  vars:
+    docker_compose_version: 1.29.2
+  roles:
+    - role: geerlingguy.docker
+      docker_install_compose: true
+      docker_compose_version: "{{ docker_compose_version }}"
+
+- name: Copy Docker Compose file
+  copy:
+    src: docker-compose.yml
+    dest: /app/docker-compose.yml
+
+- name: Deploy Docker Compose file
+  command: docker-compose up -d
+  args:
+    chdir: /app
